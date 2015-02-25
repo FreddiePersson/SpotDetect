@@ -55,7 +55,7 @@ IP = rawData(:, :, :);
 display = true;
 plane = 2;
 do_noiseROI = false;
-do_autoDetectColony = true;
+do_autoDetectColony = false;
 noiseTh = 3;
 
 %%
