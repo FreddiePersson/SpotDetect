@@ -1,4 +1,4 @@
-% Redas in a tif or STK file to variable rawData in the workspace
+% Reads in a tif or STK file to variable rawData in the workspace
 
 % Get filename and path with "uigetfile"
 [filename, pathname] = uigetfile({'*.stk; *.tif', 'Images (*.tif,*.stk)'; '*.tif',  'TIF files (*.tif)'; '*.stk', 'STK files (*.stk)'; '*.*', 'All Files (*.*)'}, 'Select image file (STK or TIF)');
@@ -19,7 +19,7 @@ if ~isempty(strfind(filename, '.tif'))
     imHeight = imInfo(1).Height;
     stackSize = numel(imInfo);
     
-    rawData = zeros(imHeight, imWidth, stackSize);
+    rawData = zeros(imHeight, imWidth, stackSize, 'uint16');
     
     t = Tiff(full_filename, 'r');
     for inFrame = 1:stackSize
