@@ -16,11 +16,6 @@ function sigmaNoise = SMT_getWaveletNoiseLevels(I, varargin)
 % 'Display'       : if given, the wavelets are displayed in individual plots.
 % 'simNoise'      : if given, the significance level is determined from
 %                   simulated gaussian noise (Starck et al 1995).
-% 'actualPlaneNoise'   : if given the significance level will be estimated from the 
-%                   actual plane, using a numeric prefactor (Olivo-Marin 2002). 
-%                   This is the default method.
-% 'firstPlaneNoise'    : if given the significance level will be estimated from
-%                   the first wavelet plane. 
 % 'noiseROI'      : Uses a subimage for the noise estiamation,
 %                   followed by a [y1, y2, x1, x2] array for the ROI. 
 % 'autoDetectColony'    : as noiseROI but automatically identifies a dense 
@@ -53,8 +48,6 @@ function sigmaNoise = SMT_getWaveletNoiseLevels(I, varargin)
 extraArgs_AT = {''};
 levels = 3;
 do_simNoise = false;
-do_actualPlaneNoise = true;
-do_firstPlaneNoise = false;
 do_noiseROI = false;
 do_autoDetectColony = false;
 
@@ -76,13 +69,7 @@ if(nargin>1)        % parse options
             k=k+1;
         elseif(strcmpi(option,'simNoise')) 
             do_simNoise = true;
-            k=k+1;
-        elseif(strcmpi(option,'actualPlaneNoise'))
-            do_actualPlaneNoise = true;
-            k=k+1;    
-        elseif(strcmpi(option,'firstPlaneNoise')) 
-            do_firstPlaneNoise = true;
-            k=k+1;  
+            k=k+1; 
         elseif(strcmpi(option,'autoDetectColony')) 
             do_autoDetectColony = true;
             k=k+1;
@@ -137,29 +124,18 @@ if do_simNoise   %(Starck et al 1995)
     for ind = 1:levels
         sigmaNoise(ind) = std2(noiseWP(:, :, ind))*sigmaI;
     end
-    
-elseif do_actualPlaneNoise
-    %% alternative where MAD/0.7 is used (Olivo-Marin 2002, Sadler, Swami, IEEE inf theory 1999)
+end
+
+    %% alternative where MAD/0.67 is used (Olivo-Marin 2002, Sadler, Swami, IEEE inf theory 1999)
     sigmaNoise = ones(1, levels);
     for i = 1:levels
         waveletplane = WP(:, :, i);
         if do_autoDetectColony
-            sigmaNoise(i) = median(abs(waveletplane(ind) - mean(waveletplane(ind))))/0.7;
+            sigmaNoise(i) = median(abs(waveletplane(ind) - median(waveletplane(ind))))/0.67;
         else
-            sigmaNoise(i) = median(abs(waveletplane(:) - mean(waveletplane(:))))/0.7;
+            sigmaNoise(i) = median(abs(waveletplane(:) - median(waveletplane(:))))/0.67;
         end
     end
-    
-elseif do_firstPlaneNoise
-    %% alternative where std2(WP(:, :, 1)) is used (Starck et al 1995)
-    waveletplane = WP(:, :, 1)
-    if do_autoDetectColony
-        sigmaNoise = std2(waveletplane(ind))*ones(1, levels);
-    else
-        sigmaNoise = std2(waveletplane)*ones(1, levels);
-    end
-
-end
 
 end
 

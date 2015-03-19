@@ -157,10 +157,10 @@ if(nargin>1)        % parse options
             extraArgs_gSWL{end+1} = option;
             k=k+1;
         elseif(strcmpi(option,'actualPlaneNoise'))
-            extraArgs_gSWL{end+1} = option;
+            extraArgs_gSWC{end+1} = option;
             k=k+1;    
         elseif(strcmpi(option,'firstPlaneNoise')) 
-            extraArgs_gSWL{end+1} = option;
+            extraArgs_gSWC{end+1} = option;
             k=k+1;  
         elseif(strcmpi(option,'autoDetectColony')) 
             extraArgs_gSWL{end+1} = option;
