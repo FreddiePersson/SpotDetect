@@ -1,4 +1,4 @@
-function [coords] = SMT_initiateSpotDetect(IP, noiseTh)
+function [coords] = initiateSpotDetect(IP, detectColony, noiseTh)
 
 % Function to run SMT_spotDetect on a stack IP(:, :, x) with x planes. All
 % used options are set here in the code except for the Noise threshold which
@@ -52,11 +52,12 @@ function [coords] = SMT_initiateSpotDetect(IP, noiseTh)
 %                   kernel around the pixel to be considered for thresholds. 
 %                   Set to 0 it the whole image statistics is to be used.
 %                   Default is 9.
+%% Fredrik Persson freddie.persson@gmail.com
 
 
-display = false;
+display = true;
 do_noiseROI = false;
-do_autoDetectColony = true;
+do_autoDetectColony = detectColony;
 plane = 2;
 
 %%

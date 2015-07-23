@@ -18,6 +18,11 @@ function WP = SMT_getSignWaveletCoeffs(I, noiseLevels, varargin)
 %                   non-informative prior will be used.
 % 'noiseTH'     : followed by the threshold to use for the wavelet coeff 
 %                   significance, sign = TH*noiselevels. Default is 3.
+% 'actualPlaneNoise'   : if given the significance level will be estimated from the 
+%                   actual plane, using a numeric prefactor (Olivo-Marin 2002). 
+%                   This is the default method.
+% 'firstPlaneNoise'    : if given the significance level will be estimated from
+%                   the first wavelet plane. 
 %
 %
 
@@ -47,6 +52,8 @@ do_jeffrey = false;
 extraArgs_AT = {''};
 levels = 3;
 noiseTH = 3;
+do_actualPlaneNoise = true;
+do_firstPlaneNoise = false;
  
 if(nargin>2)        % parse options
     kmax = nargin-1;   % stopping criterion
@@ -73,7 +80,15 @@ if(nargin>2)        % parse options
                     error('SMT_getSignWaveletCoeffs: Levels option must be followed by a positive integer larger than 2.')
                 end
             end
-            k=k+2;   
+            k=k+2; 
+        elseif(strcmpi(option,'actualPlaneNoise'))
+            do_actualPlaneNoise = true;
+            do_firstPlaneNoise = false;
+            k=k+1;    
+        elseif(strcmpi(option,'firstPlaneNoise')) 
+            do_firstPlaneNoise = true;
+            do_actualPlaneNoise = false;
+            k=k+1; 
         elseif(strcmpi(option,'noiseTH'))
             if(~isempty(varargin{k+1}))
                 noiseTH = varargin{k+1};
@@ -89,22 +104,37 @@ if(nargin>2)        % parse options
 end
  
 %% start of actual code
- 
+
 tempImg = zeros(size(I));
 WP = SMT_ATrous(I, extraArgs_AT);
- 
-for ind = 1:levels
-    waveletPlane = WP(:,:,ind);
-    if do_jeffrey
-        A = (WaveletPlane.^2-noiseTH*noiseLevels(ind)^2);    % Jeffreys non informative prior threshold
-        A(A<0) = 0;
-        tempImg = (1./WaveletPlane).*A;
-    else
-        tempImg(abs(waveletPlane) >= noiseTH*noiseLevels(ind)) = 1; % hard threshold
-    end
+
+if do_actualPlaneNoise
     
-    WP(:, :, ind) = waveletPlane.*tempImg;
+    for ind = 1:levels
+        waveletPlane = WP(:,:,ind);
+        if do_jeffrey
+            A = (WaveletPlane.^2-noiseTH*noiseLevels(ind)^2);    % Jeffreys non informative prior threshold
+            A(A<0) = 0;
+            tempImg = (1./WaveletPlane).*A;
+        else
+            tempImg(abs(waveletPlane) >= noiseTH*noiseLevels(ind)) = 1; % hard threshold
+        end
+        
+        WP(:, :, ind) = waveletPlane.*tempImg;
+    end
+elseif do_firstPlaneNoise
+    for ind = 1:levels
+        waveletPlane = WP(:,:,ind);
+        if do_jeffrey
+            A = (WaveletPlane.^2-noiseTH*noiseLevels(1)^2);    % Jeffreys non informative prior threshold
+            A(A<0) = 0;
+            tempImg = (1./WaveletPlane).*A;
+        else
+            tempImg(abs(waveletPlane) >= noiseTH*noiseLevels(1)) = 1; % hard threshold
+        end
+        
+        WP(:, :, ind) = waveletPlane.*tempImg;
+    end
 end
- 
 end
 
